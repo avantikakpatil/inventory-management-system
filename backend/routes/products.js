@@ -7,15 +7,12 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   console.log("Received request to /api/products");
   try {
-    // Fetch all products
     const result = await pool.query("SELECT * FROM products ORDER BY created_at DESC");
 
-    // If no products found
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "No products found." });
     }
 
-    // Return all products
     res.json(result.rows); 
   } catch (err) {
     console.error(err.message);
@@ -26,21 +23,44 @@ router.get("/", async (req, res) => {
 // Fetch verified products
 router.get("/verified", async (req, res) => {
   try {
-    // Fetch verified products
     const result = await pool.query(
       "SELECT * FROM products WHERE verified = true ORDER BY created_at DESC"
     );
 
-    // If no verified products found
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "No verified products found." });
     }
 
-    // Return verified products
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "An error occurred while fetching verified products." });
+  }
+});
+
+router.patch("/:id/location", async (req, res) => {
+  console.log("Updating location for product ID:", req.params.id);  // Add logging here
+  try {
+    const { id } = req.params;
+    const { location } = req.body;
+
+    if (!location) {
+      return res.status(400).json({ message: "Location is required" });
+    }
+
+    const result = await pool.query(
+      "UPDATE products SET location = $1 WHERE id = $2 RETURNING *",
+      [location, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    res.json({ message: "Location updated successfully.", product: result.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "An error occurred while updating location." });
   }
 });
 
