@@ -1,63 +1,72 @@
 const express = require("express");
-const multer = require("multer");
-const xlsx = require("xlsx");
 const pool = require("../db/db");
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const upload = multer({ dest: "uploads/" });
+// Get all products
+router.get("/", async (req, res) => {
+  console.log("Received request to /api/products");
+  try {
+    // Fetch all products
+    const result = await pool.query("SELECT * FROM products ORDER BY created_at DESC");
 
-// Upload and store Excel data with verification
-router.post("/upload", upload.single("file"), async (req, res) => {
-    try {
-        const filePath = req.file.path;
-
-        // Parse the Excel file
-        const workbook = xlsx.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-        // Check if the sheetData is empty
-        if (sheetData.length === 0) {
-            return res.status(400).json({ message: "No data found in the uploaded file." });
-        }
-
-        // Process each row in the Excel file
-        for (const row of sheetData) {
-            const { name, price, quantity } = row;
-
-            // Check if all required fields are present
-            if (!name || !price || !quantity) {
-                continue; // Skip the row if it's incomplete
-            }
-
-            // Check if the product already exists in the database
-            const existingProduct = await pool.query(
-                "SELECT * FROM products WHERE name = $1",
-                [name]
-            );
-
-            if (existingProduct.rowCount > 0) {
-                // If the product exists, update it and mark it as verified
-                await pool.query(
-                    "UPDATE products SET price = $1, quantity = $2, verified = true WHERE name = $3",
-                    [price, quantity, name]
-                );
-            } else {
-                // If the product doesn't exist, insert it
-                await pool.query(
-                    "INSERT INTO products (name, price, quantity, verified) VALUES ($1, $2, $3, $4)",
-                    [name, price, quantity, true]
-                );
-            }
-        }
-
-        res.json({ message: "Data successfully processed and stored in the database." });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "An error occurred while processing the file." });
+    // If no products found
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No products found." });
     }
+
+    // Return all products
+    res.json(result.rows); 
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "An error occurred while fetching products." });
+  }
+});
+
+// Fetch verified products
+router.get("/verified", async (req, res) => {
+  try {
+    // Fetch verified products
+    const result = await pool.query(
+      "SELECT * FROM products WHERE verified = true ORDER BY created_at DESC"
+    );
+
+    // If no verified products found
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "No verified products found." });
+    }
+
+    // Return verified products
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "An error occurred while fetching verified products." });
+  }
+});
+
+// Verify product by ID
+router.patch("/:id/verify", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid product ID." });
+    }
+
+    const result = await pool.query(
+      "UPDATE products SET verified = true WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    res.json({ message: "Product verified successfully.", product: result.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "An error occurred while verifying the product." });
+  }
 });
 
 module.exports = router;

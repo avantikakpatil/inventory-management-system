@@ -1,27 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const ProductVerification = () => {
     const [products, setProducts] = useState([]);
 
     useEffect(() => {
-        // Fetch products from the backend
-        axios.get("/api/products")
-            .then((response) => setProducts(response.data))
-            .catch((error) => console.error("Error fetching products:", error));
+        // Fetch products data from the backend
+        axios.get("http://localhost:5000/api/products") // Correct the URL here
+            .then((response) => {
+                setProducts(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching products:", error);
+            });
     }, []);
 
     const handleVerify = (id) => {
-        // Mark a product as verified
-        axios.patch(`/api/products/${id}/verify`)
+        // Send request to mark product as verified
+        axios.patch(`http://localhost:5000/api/products/${id}/verify`) // Correct the URL here
             .then((response) => {
+                // Update the state to reflect the verified status
                 setProducts((prevProducts) =>
                     prevProducts.map((product) =>
                         product.id === id ? { ...product, verified: true } : product
                     )
                 );
             })
-            .catch((error) => console.error("Error verifying product:", error));
+            .catch((error) => {
+                console.error("Error verifying product:", error);
+            });
     };
 
     return (
@@ -30,9 +37,10 @@ const ProductVerification = () => {
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Product Name</th>
                         <th>Price</th>
                         <th>Quantity</th>
+                        <th>Created At</th>
                         <th>Verified</th>
                         <th>Actions</th>
                     </tr>
@@ -43,6 +51,7 @@ const ProductVerification = () => {
                             <td>{product.name}</td>
                             <td>{product.price}</td>
                             <td>{product.quantity}</td>
+                            <td>{new Date(product.created_at).toLocaleString()}</td>
                             <td>{product.verified ? "Yes" : "No"}</td>
                             <td>
                                 {!product.verified && (

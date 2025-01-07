@@ -16,6 +16,13 @@ app.use(express.static(path.join(__dirname, "../public")));
 // Routes
 app.use("/api/products", productsRoute);
 
+app.get('/api/products/verified', (req, res) => {
+  // Logic to fetch verified products
+  const verifiedProducts = db.query("SELECT * FROM products WHERE verified = true");
+  res.json(verifiedProducts);
+});
+
+
 // Server setup
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
