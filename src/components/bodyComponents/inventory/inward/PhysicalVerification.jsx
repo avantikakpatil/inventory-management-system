@@ -1,71 +1,62 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const PhysicalVerification = () => {
-  // Mock data for demonstration
-  const [verificationData, setVerificationData] = useState([
-    { id: 1, name: "Item A", quantity: 10, verified: false },
-    { id: 2, name: "Item B", quantity: 5, verified: false },
-    { id: 3, name: "Item C", quantity: 8, verified: false },
-  ]);
+const ProductVerification = () => {
+    const [products, setProducts] = useState([]);
 
-  const handleVerify = async (itemId) => {
-    try {
-      const response = await apiCallToVerify(itemId); // Replace with actual API call
-      if (response.success) {
-        alert(`Item ${itemId} verified successfully!`);
-        // Update state to reflect verification
-      } else {
-        alert("Verification failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error verifying item:", error);
-      alert("An error occurred during verification.");
-    }
-  };
-  
+    useEffect(() => {
+        // Fetch products from the backend
+        axios.get("/api/products")
+            .then((response) => setProducts(response.data))
+            .catch((error) => console.error("Error fetching products:", error));
+    }, []);
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Physical Verification</h2>
-      {verificationData.length === 0 ? (
-        <p>No items to verify.</p>
-      ) : (
-        verificationData.map((item) => (
-          <div
-            key={item.id}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "5px",
-              padding: "10px",
-              marginBottom: "10px",
-              backgroundColor: item.verified ? "#d4edda" : "#f8d7da",
-            }}
-          >
-            <p>
-              <strong>{item.name}</strong> - Quantity: {item.quantity}
-            </p>
-            {item.verified ? (
-              <p style={{ color: "green", fontWeight: "bold" }}>Verified</p>
-            ) : (
-              <button
-                onClick={() => handleVerify(item.id)}
-                style={{
-                  padding: "5px 10px",
-                  border: "none",
-                  backgroundColor: "#007bff",
-                  color: "white",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                Verify
-              </button>
-            )}
-          </div>
-        ))
-      )}
-    </div>
-  );
+    const handleVerify = (id) => {
+        // Mark a product as verified
+        axios.patch(`/api/products/${id}/verify`)
+            .then((response) => {
+                setProducts((prevProducts) =>
+                    prevProducts.map((product) =>
+                        product.id === id ? { ...product, verified: true } : product
+                    )
+                );
+            })
+            .catch((error) => console.error("Error verifying product:", error));
+    };
+
+    return (
+        <div>
+            <h1>Product Verification</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Verified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {products.map((product) => (
+                        <tr key={product.id}>
+                            <td>{product.name}</td>
+                            <td>{product.price}</td>
+                            <td>{product.quantity}</td>
+                            <td>{product.verified ? "Yes" : "No"}</td>
+                            <td>
+                                {!product.verified && (
+                                    <button onClick={() => handleVerify(product.id)}>
+                                        Verify
+                                    </button>
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
 };
 
-export default PhysicalVerification;
+export default ProductVerification;
