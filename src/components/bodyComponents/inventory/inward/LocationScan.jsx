@@ -12,13 +12,12 @@ const LocationScan = () => {
 
   return (
     <div>
-      <h2>Location and Product Scan</h2>
-      <label>
-        Scan Product:
-        <input type="text" onChange={handleScan} />
-      </label>
-      <p>Assigned Location: {location}</p>
-    </div>
+  <h2>Assigned Locations</h2>
+  <ul>
+    <li>{location}</li>
+  </ul>
+</div>
+
   );
 };
 

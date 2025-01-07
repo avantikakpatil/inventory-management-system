@@ -1,7 +1,9 @@
+// File: /src/components/bodyComponents/inventory/inward/BarcodeGeneration.jsx
+
 import React from "react";
 
-const BarcodeComponent = () => {
-  return <div>Barcode Verification</div>;
+const BarcodeGeneration = () => {
+  return <div>Barcode Generation Component</div>;
 };
 
-export default BarcodeComponent;
+export default BarcodeGeneration;

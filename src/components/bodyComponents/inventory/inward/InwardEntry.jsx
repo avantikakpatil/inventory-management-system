@@ -2,10 +2,16 @@ import React, { useState } from "react";
 
 const InwardEntry = () => {
   const [formData, setFormData] = useState({
-    item: "",
-    quantity: 0,
-    supplier: "",
-    date: "",
+    productName: "",
+    sku: "",
+    category: "",
+    quantity: "",
+    unitPrice: "",
+    supplierName: "",
+    reorderLevel: "",
+    description: "",
+    barcode: "",
+    storageLocation: "",
   });
 
   const [itemList, setItemList] = useState([]);
@@ -21,51 +27,68 @@ const InwardEntry = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setItemList([...itemList, { ...formData, id: itemList.length + 1 }]);
-    setFormData({ item: "", quantity: 0, supplier: "", date: "" });
+    setFormData({
+      productName: "",
+      sku: "",
+      category: "",
+      quantity: "",
+      unitPrice: "",
+      supplierName: "",
+      reorderLevel: "",
+      description: "",
+      barcode: "",
+      storageLocation: "",
+    });
     setShowForm(false); // Hide form after submission
-  };
-
-  // Handle Excel upload (Mock function for now)
-  const handleExcelUpload = (e) => {
-    const file = e.target.files[0];
-    console.log("Excel file uploaded:", file);
-    // Add logic here to parse the Excel file and update the itemList
   };
 
   return (
     <div>
       <h2>Inward Goods Entry</h2>
       <div style={{ marginBottom: "20px" }}>
-        {/* Buttons for manual entry and Excel upload */}
         <button
           onClick={() => setShowForm(true)}
           style={{ marginRight: "10px", padding: "10px 15px" }}
         >
           Manual Entry
         </button>
-        <label style={{ padding: "10px 15px", border: "1px solid black", cursor: "pointer" }}>
-          Upload Excel
-          <input
-            type="file"
-            accept=".xlsx, .xls"
-            onChange={handleExcelUpload}
-            style={{ display: "none" }}
-          />
-        </label>
       </div>
 
-      {/* Display the form when "Manual Entry" is clicked */}
       {showForm && (
-        <form onSubmit={handleSubmit} style={{ marginBottom: "20px", border: "1px solid #ccc", padding: "15px" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ marginBottom: "20px", border: "1px solid #ccc", padding: "15px" }}
+        >
           <label>
-            Item Name:
+            Product Name:
             <input
               type="text"
-              name="item"
-              value={formData.item}
+              name="productName"
+              value={formData.productName}
               onChange={handleChange}
               required
-              style={{ marginLeft: "10px", marginBottom: "10px" }}
+            />
+          </label>
+          <br />
+          <label>
+            SKU:
+            <input
+              type="text"
+              name="sku"
+              value={formData.sku}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <br />
+          <label>
+            Category:
+            <input
+              type="text"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
             />
           </label>
           <br />
@@ -77,31 +100,70 @@ const InwardEntry = () => {
               value={formData.quantity}
               onChange={handleChange}
               required
-              style={{ marginLeft: "10px", marginBottom: "10px" }}
             />
           </label>
           <br />
           <label>
-            Supplier:
+            Unit Price:
+            <input
+              type="number"
+              step="0.01"
+              name="unitPrice"
+              value={formData.unitPrice}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <br />
+          <label>
+            Supplier Name:
             <input
               type="text"
-              name="supplier"
-              value={formData.supplier}
+              name="supplierName"
+              value={formData.supplierName}
               onChange={handleChange}
               required
-              style={{ marginLeft: "10px", marginBottom: "10px" }}
             />
           </label>
           <br />
           <label>
-            Date:
+            Reorder Level:
             <input
-              type="date"
-              name="date"
-              value={formData.date}
+              type="number"
+              name="reorderLevel"
+              value={formData.reorderLevel}
+              onChange={handleChange}
+            />
+          </label>
+          <br />
+          <label>
+            Description:
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+            />
+          </label>
+          <br />
+          <label>
+            Barcode:
+            <input
+              type="text"
+              name="barcode"
+              value={formData.barcode}
               onChange={handleChange}
               required
-              style={{ marginLeft: "10px", marginBottom: "10px" }}
+            />
+          </label>
+          <br />
+          <label>
+            Storage Location:
+            <input
+              type="text"
+              name="storageLocation"
+              value={formData.storageLocation}
+              onChange={handleChange}
+              required
             />
           </label>
           <br />
@@ -111,7 +173,6 @@ const InwardEntry = () => {
         </form>
       )}
 
-      {/* Display the item list */}
       <div>
         <h3>Item List</h3>
         {itemList.length > 0 ? (
@@ -119,20 +180,32 @@ const InwardEntry = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Item Name</th>
+                <th>Product Name</th>
+                <th>SKU</th>
+                <th>Category</th>
                 <th>Quantity</th>
-                <th>Supplier</th>
-                <th>Date</th>
+                <th>Unit Price</th>
+                <th>Supplier Name</th>
+                <th>Reorder Level</th>
+                <th>Description</th>
+                <th>Barcode</th>
+                <th>Storage Location</th>
               </tr>
             </thead>
             <tbody>
               {itemList.map((item) => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
-                  <td>{item.item}</td>
+                  <td>{item.productName}</td>
+                  <td>{item.sku}</td>
+                  <td>{item.category}</td>
                   <td>{item.quantity}</td>
-                  <td>{item.supplier}</td>
-                  <td>{item.date}</td>
+                  <td>{item.unitPrice}</td>
+                  <td>{item.supplierName}</td>
+                  <td>{item.reorderLevel}</td>
+                  <td>{item.description}</td>
+                  <td>{item.barcode}</td>
+                  <td>{item.storageLocation}</td>
                 </tr>
               ))}
             </tbody>
